@@ -13,12 +13,29 @@
     --bg:#f4f6f9;
     --card:#ffffff;
 }
+*{box-sizing:border-box}
 body{
     margin:0;
     font-family:Poppins,Roboto,sans-serif;
     background:var(--bg);
     padding:20px;
 }
+
+/* LOADER */
+#loader{
+    position:fixed;
+    inset:0;
+    background:#f4f6f9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:600;
+    color:#1976d2;
+    z-index:9999;
+}
+
+/* COMMON */
 h2{text-align:center;color:var(--primary)}
 .container{
     max-width:1100px;
@@ -33,6 +50,7 @@ input,button{
     padding:0 16px;
     border-radius:12px;
     border:1px solid #ccc;
+    font-size:14px;
 }
 button{
     background:var(--primary);
@@ -59,7 +77,7 @@ button:hover{background:#1259a7}
 }
 .summary h3{margin:8px 0 0;font-size:28px}
 
-/* WORKER */
+/* WORKER CARD */
 .worker-card{
     display:flex;
     gap:16px;
@@ -91,8 +109,11 @@ tbody tr:nth-child(even){background:#f7f9fc}
 
 <body>
 
+<!-- LOADER -->
+<div id="loader">Loading Worker Dashboard...</div>
+
 <!-- LOGIN -->
-<div class="container" id="loginBox">
+<div class="container hide" id="loginBox">
     <h2>Worker Login</h2>
     <input id="loginWorkerId" placeholder="Enter Worker ID">
     <br><br>
@@ -163,6 +184,7 @@ Promise.all([
     fetch(workerCSV).then(r=>r.text()),
     fetch(attendanceCSV).then(r=>r.text())
 ]).then(([w,a])=>{
+
     csv(w).slice(1).forEach(r=>{
         if(r[1]) workers[r[1]]={name:r[2],des:r[3],rate:r[5]};
     });
@@ -176,8 +198,17 @@ Promise.all([
         });
     });
 
-    // ✅ DATA READY → AUTO LOGIN
-    autoLoginFromQuery();
+    // 🔐 DECIDE VIEW
+    let params=new URLSearchParams(location.search);
+    let id=params.get("id");
+
+    loader.style.display="none";
+
+    if(id && workers[id]){
+        showDashboard(id);   // AUTO LOGIN
+    }else{
+        loginBox.classList.remove("hide");
+    }
 });
 
 /* ================= LOGIN ================= */
@@ -185,12 +216,6 @@ function manualLogin(){
     let id=loginWorkerId.value.trim();
     if(!workers[id]) return alert("Invalid Worker ID");
     showDashboard(id);
-}
-
-function autoLoginFromQuery(){
-    let params=new URLSearchParams(location.search);
-    let id=params.get("id");
-    if(id && workers[id]) showDashboard(id);
 }
 
 function showDashboard(id){
@@ -223,7 +248,8 @@ function filterData(){
         if(e && r.date>e) return;
 
         ta+=r.att; to+=r.ot;
-        output.innerHTML+=`<tr>
+        output.innerHTML+=`
+        <tr>
             <td>${r.date}</td>
             <td>${r.att}</td>
             <td>${r.ot}</td>
