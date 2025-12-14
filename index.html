@@ -14,19 +14,14 @@
     --primary:#1976d2;
     --bg:#f4f6f9;
     --card:#ffffff;
-    --text:#333;
 }
 body{
     margin:0;
-    font-family:"Roboto","Poppins",sans-serif;
+    font-family:Poppins,Roboto,sans-serif;
     background:var(--bg);
     padding:20px;
 }
-h2{
-    color:var(--primary);
-    text-align:center;
-    margin-bottom:20px;
-}
+h2{color:var(--primary);text-align:center}
 .container{
     max-width:1100px;
     margin:auto;
@@ -42,10 +37,6 @@ input,button{
     border:1px solid #ccc;
     font-size:14px;
 }
-input:focus{
-    outline:none;
-    border-color:var(--primary);
-}
 button{
     background:var(--primary);
     color:#fff;
@@ -53,16 +44,8 @@ button{
     cursor:pointer;
     font-weight:600;
 }
-button:hover{
-    background:#1259a7;
-}
+button:hover{background:#1259a7}
 .hide{display:none}
-
-/* LOGIN */
-#loginBox{
-    max-width:420px;
-    text-align:center;
-}
 
 /* SUMMARY */
 .summary{
@@ -76,71 +59,35 @@ button:hover{
     color:#fff;
     padding:20px;
     border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
 }
-.summary small{opacity:.9}
-.summary h3{
-    margin:8px 0 0;
-    font-size:28px;
-}
+.summary h3{margin:8px 0 0;font-size:28px}
 
-/* WORKER DETAILS */
+/* WORKER CARD */
 .worker-card{
     display:flex;
-    align-items:center;
-    gap:18px;
+    gap:16px;
     background:#eef4ff;
     padding:18px;
     border-radius:16px;
-    margin-bottom:18px;
+    margin-bottom:16px;
 }
-.worker-avatar{
-    width:70px;
-    height:70px;
+.avatar{
+    width:70px;height:70px;
     border-radius:50%;
-    background:var(--primary);
-    color:#fff;
+    background:#1976d2;
+    color:white;
     display:flex;
     align-items:center;
     justify-content:center;
     font-size:26px;
     font-weight:700;
 }
-.worker-info{
-    line-height:1.7;
-    font-weight:500;
-}
-
-/* FILTER */
-.filters{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-bottom:16px;
-}
 
 /* TABLE */
-table{
-    width:100%;
-    border-collapse:collapse;
-    overflow:hidden;
-    border-radius:16px;
-}
-thead{
-    background:var(--primary);
-    color:#fff;
-}
-th,td{
-    padding:12px;
-    text-align:center;
-    font-size:14px;
-}
-tbody tr:nth-child(even){
-    background:#f7f9fc;
-}
-tbody tr:hover{
-    background:#eaf1ff;
-}
+table{width:100%;border-collapse:collapse}
+thead{background:#1976d2;color:white}
+th,td{padding:12px;text-align:center}
+tbody tr:nth-child(even){background:#f7f9fc}
 </style>
 </head>
 
@@ -151,19 +98,17 @@ tbody tr:hover{
     <h2>Worker Login</h2>
     <input type="text" id="loginWorkerId" placeholder="Enter Worker ID">
     <br><br>
-    <button onclick="loginWorker()">Login</button>
+    <button onclick="manualLogin()">Login</button>
 </div>
 
 <!-- DASHBOARD -->
 <div class="container hide" id="dashboard">
+    <h2>Attendance Dashboard</h2>
 
-    <h2>Attendance & OT Dashboard</h2>
-
-    <!-- SUMMARY -->
     <div class="summary">
         <div class="card">
             <small>Total Attended</small>
-            <h3 id="sumAttended">0</h3>
+            <h3 id="sumAtt">0</h3>
         </div>
         <div class="card">
             <small>Total OT (Hour)</small>
@@ -171,10 +116,9 @@ tbody tr:hover{
         </div>
     </div>
 
-    <!-- WORKER DETAILS -->
     <div class="worker-card">
-        <div class="worker-avatar" id="avatar">W</div>
-        <div class="worker-info">
+        <div class="avatar" id="avatar">W</div>
+        <div>
             <div><b>ID:</b> <span id="dId"></span></div>
             <div><b>Name:</b> <span id="dName"></span></div>
             <div><b>Designation:</b> <span id="dDes"></span></div>
@@ -182,15 +126,13 @@ tbody tr:hover{
         </div>
     </div>
 
-    <!-- FILTER -->
-    <div class="filters">
+    <div style="margin-bottom:16px">
         <input type="date" id="startDate">
         <input type="date" id="endDate">
         <button onclick="filterData()">Filter</button>
         <button onclick="logout()">Logout</button>
     </div>
 
-    <!-- TABLE -->
     <table>
         <thead>
             <tr>
@@ -199,89 +141,85 @@ tbody tr:hover{
                 <th>OT Hour</th>
             </tr>
         </thead>
-        <tbody id="outputTable"></tbody>
+        <tbody id="output"></tbody>
     </table>
-
 </div>
 
 <script>
-const linkWorker="https://docs.google.com/spreadsheets/d/e/2PACX-1vScKUqfoXQNBZy7kPYd6bYpHV8_KsOMTDAA-Rx9PI03rZRUkoRHIz25htZDEuyhf8SerewYetdOgJai/pub?gid=544154648&single=true&output=csv";
-const linkAttendance="https://docs.google.com/spreadsheets/d/e/2PACX-1vQeMfVC0OT9CSn4ShLoMNqfZ3pFD5RlkS2dCj1jdfjzvvvGYWOSUy5Mr-zdQ97lb96sjnoXZh5zFaCP/pub?gid=1560298674&single=true&output=csv";
+const workerCSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vScKUqfoXQNBZy7kPYd6bYpHV8_KsOMTDAA-Rx9PI03rZRUkoRHIz25htZDEuyhf8SerewYetdOgJai/pub?gid=544154648&single=true&output=csv";
+const attendanceCSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vQeMfVC0OT9CSn4ShLoMNqfZ3pFD5RlkS2dCj1jdfjzvvvGYWOSUy5Mr-zdQ97lb96sjnoXZh5zFaCP/pub?gid=1560298674&single=true&output=csv";
 
-let workerList={},attendanceList=[],loggedWorkerId="";
+let workers={},attendance=[],loggedId="";
 
-function parseCSV(t){return t.split("\n").map(r=>r.split(","))}
-function formatDate(d){
+function csv(t){return t.split("\n").map(r=>r.split(","))}
+function fDate(d){
     let p=d.split("/");
     return p.length===3?`${p[2]}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`:d;
 }
 
-fetch(linkWorker).then(r=>r.text()).then(d=>{
-    parseCSV(d).slice(1).forEach(c=>{
-        if(!c[1])return;
-        workerList[c[1]]={name:c[2],des:c[3],rate:c[5]};
+Promise.all([
+    fetch(workerCSV).then(r=>r.text()),
+    fetch(attendanceCSV).then(r=>r.text())
+]).then(([w,a])=>{
+    csv(w).slice(1).forEach(r=>{
+        if(r[1])workers[r[1]]={name:r[2],des:r[3],rate:r[5]};
     });
-    fetch(linkAttendance).then(r=>r.text()).then(d=>{
-        parseCSV(d).slice(1).forEach(c=>{
-            if(!c[1])return;
-            attendanceList.push({
-                id:c[1],
-                date:formatDate(c[5]),
-                attended:parseFloat(c[6])||0,
-                ot:parseFloat(c[7])||0
-            });
-        });
+    csv(a).slice(1).forEach(r=>{
+        if(r[1])attendance.push({id:r[1],date:fDate(r[5]),att:+r[6]||0,ot:+r[7]||0});
     });
+    autoLoginFromURL();
 });
 
-function loginWorker(){
-    let id=loginWorkerId.value.trim();
-    if(!workerList[id]){alert("Invalid Worker ID");return;}
-    loggedWorkerId=id;
-
+function showDashboard(id){
+    loggedId=id;
     loginBox.classList.add("hide");
     dashboard.classList.remove("hide");
 
     dId.innerText=id;
-    dName.innerText=workerList[id].name;
-    dDes.innerText=workerList[id].des;
-    dRate.innerText=workerList[id].rate;
-    avatar.innerText=workerList[id].name.charAt(0).toUpperCase();
+    dName.innerText=workers[id].name;
+    dDes.innerText=workers[id].des;
+    dRate.innerText=workers[id].rate;
+    avatar.innerText=workers[id].name.charAt(0).toUpperCase();
 
     filterData();
 }
 
-function logout(){location.reload();}
+function manualLogin(){
+    let id=loginWorkerId.value.trim();
+    if(!workers[id]) return alert("Invalid Worker ID");
+    showDashboard(id);
+}
+
+function autoLoginFromURL(){
+    let parts=location.pathname.split("/").filter(Boolean);
+    let id=parts.length>1?parts[parts.length-1]:"";
+    if(id && workers[id]) showDashboard(id);
+}
 
 function filterData(){
     let s=startDate.value,e=endDate.value;
-    outputTable.innerHTML="";
-    let tAtt=0,tOT=0;
+    output.innerHTML="";
+    let ta=0,to=0;
 
-    attendanceList.forEach(r=>{
-        if(r.id!==loggedWorkerId)return;
-        if(s && r.date<s)return;
-        if(e && r.date>e)return;
+    attendance.forEach(r=>{
+        if(r.id!==loggedId) return;
+        if(s && r.date<s) return;
+        if(e && r.date>e) return;
 
-        tAtt+=r.attended;
-        tOT+=r.ot;
-
-        outputTable.innerHTML+=`
-        <tr>
-            <td>${r.date}</td>
-            <td>${r.attended}</td>
-            <td>${r.ot}</td>
-        </tr>`;
+        ta+=r.att; to+=r.ot;
+        output.innerHTML+=`<tr><td>${r.date}</td><td>${r.att}</td><td>${r.ot}</td></tr>`;
     });
 
-    sumAttended.innerText=tAtt;
-    sumOT.innerText=tOT;
+    sumAtt.innerText=ta;
+    sumOT.innerText=to;
 }
+
+function logout(){location.href="./";}
 </script>
 
 <script>
-if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('sw.js');
+if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js");
 }
 </script>
 
