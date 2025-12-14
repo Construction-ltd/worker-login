@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Worker Attendance App</title>
-
+<title>Worker Attendance & Payment App</title>
 <meta name="theme-color" content="#1976d2">
-
 <style>
 :root{
     --primary:#1976d2;
@@ -14,99 +12,39 @@
     --card:#ffffff;
 }
 *{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:Poppins,Roboto,sans-serif;
-    background:var(--bg);
-    padding:20px;
-}
+body{margin:0;font-family:Poppins,Roboto,sans-serif;background:var(--bg);padding:20px}
 
 /* LOADER */
-#loader{
-    position:fixed;
-    inset:0;
-    background:#f4f6f9;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    font-weight:600;
-    color:#1976d2;
-    z-index:9999;
-}
+#loader{position:fixed;inset:0;background:#f4f6f9;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#1976d2;z-index:9999}
 
 /* COMMON */
 h2{text-align:center;color:var(--primary)}
-.container{
-    max-width:1100px;
-    margin:auto;
-    background:var(--card);
-    padding:24px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
-input,button{
-    height:44px;
-    padding:0 16px;
-    border-radius:12px;
-    border:1px solid #ccc;
-    font-size:14px;
-}
-button{
-    background:var(--primary);
-    color:white;
-    border:none;
-    font-weight:600;
-    cursor:pointer;
-}
+.container{max-width:1100px;margin:auto;background:var(--card);padding:24px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+input,button{height:44px;padding:0 16px;border-radius:12px;border:1px solid #ccc;font-size:14px}
+button{background:var(--primary);color:white;border:none;font-weight:600;cursor:pointer}
 button:hover{background:#1259a7}
 .hide{display:none}
 
 /* SUMMARY */
-.summary{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:16px;
-    margin-bottom:20px;
-}
-.summary .card{
-    background:linear-gradient(135deg,#1976d2,#42a5f5);
-    color:white;
-    padding:20px;
-    border-radius:16px;
-}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
+.summary .card{background:linear-gradient(135deg,#1976d2,#42a5f5);color:white;padding:20px;border-radius:16px}
 .summary h3{margin:8px 0 0;font-size:28px}
 
 /* WORKER CARD */
-.worker-card{
-    display:flex;
-    gap:16px;
-    background:#eef4ff;
-    padding:18px;
-    border-radius:16px;
-    margin-bottom:16px;
-}
-.avatar{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    background:#1976d2;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:26px;
-    font-weight:700;
-}
+.worker-card{display:flex;gap:16px;background:#eef4ff;padding:18px;border-radius:16px;margin-bottom:16px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#1976d2;color:white;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700}
 
 /* TABLE */
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;margin-top:16px}
 thead{background:#1976d2;color:white}
 th,td{padding:12px;text-align:center}
 tbody tr:nth-child(even){background:#f7f9fc}
+
+/* FOOTER NAV */
+footer{position:fixed;bottom:0;left:0;width:100%;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -3px 10px rgba(0,0,0,.1)}
+footer button{width:45%;border-radius:12px;}
 </style>
 </head>
-
 <body>
 
 <!-- LOADER -->
@@ -120,8 +58,8 @@ tbody tr:nth-child(even){background:#f7f9fc}
     <button onclick="manualLogin()">Login</button>
 </div>
 
-<!-- DASHBOARD -->
-<div class="container hide" id="dashboard">
+<!-- DASHBOARD PAGE -->
+<div class="container hide" id="dashboardPage">
     <h2>Attendance Dashboard</h2>
 
     <div class="summary">
@@ -146,9 +84,9 @@ tbody tr:nth-child(even){background:#f7f9fc}
     </div>
 
     <div style="margin-bottom:16px">
-        <input type="date" id="startDate">
-        <input type="date" id="endDate">
-        <button onclick="filterData()">Filter</button>
+        <input type="date" id="startDateAtt">
+        <input type="date" id="endDateAtt">
+        <button onclick="filterAttendance()">Filter</button>
         <button onclick="logout()">Logout</button>
     </div>
 
@@ -160,54 +98,76 @@ tbody tr:nth-child(even){background:#f7f9fc}
                 <th>OT Hour</th>
             </tr>
         </thead>
-        <tbody id="output"></tbody>
+        <tbody id="outputAtt"></tbody>
     </table>
 </div>
+
+<!-- PAYMENT PAGE -->
+<div class="container hide" id="paymentPage">
+    <h2>Payment Dashboard</h2>
+
+    <div class="summary">
+        <div class="card">
+            <small>Total Payment</small>
+            <h3 id="totalPayment">0</h3>
+        </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+        <input type="date" id="startDatePay">
+        <input type="date" id="endDatePay">
+        <button onclick="filterPayment()">Filter Payment</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody id="outputPay"></tbody>
+    </table>
+</div>
+
+<!-- FOOTER NAV -->
+<footer>
+    <button onclick="showPage('dashboardPage')">Home</button>
+    <button onclick="showPage('paymentPage')">Payment</button>
+</footer>
 
 <script>
 /* ================= CONFIG ================= */
 const workerCSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vScKUqfoXQNBZy7kPYd6bYpHV8_KsOMTDAA-Rx9PI03rZRUkoRHIz25htZDEuyhf8SerewYetdOgJai/pub?gid=544154648&single=true&output=csv";
 const attendanceCSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vQeMfVC0OT9CSn4ShLoMNqfZ3pFD5RlkS2dCj1jdfjzvvvGYWOSUy5Mr-zdQ97lb96sjnoXZh5zFaCP/pub?gid=1560298674&single=true&output=csv";
+const paymentCSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vSTC_KsZ6QoVhc3gqToo1mV6fjmYwprGfieo2hVQ_4MUWViZNpslBZo3g7lua8g3cSxQbVMzaVJvgpl/pub?output=csv";
 
 /* ================= DATA ================= */
-let workers={},attendance=[],loggedId="";
+let workers={},attendance=[],payments=[],loggedId="";
 
 /* ================= HELPERS ================= */
 function csv(t){return t.split("\n").map(r=>r.split(","))}
-function fDate(d){
-    let p=d.split("/");
-    return p.length===3?`${p[2]}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`:d;
-}
+function fDate(d){let p=d.split("/");return p.length===3?`${p[2]}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`:d}
 
 /* ================= LOAD DATA ================= */
 Promise.all([
     fetch(workerCSV).then(r=>r.text()),
-    fetch(attendanceCSV).then(r=>r.text())
-]).then(([w,a])=>{
+    fetch(attendanceCSV).then(r=>r.text()),
+    fetch(paymentCSV).then(r=>r.text())
+]).then(([w,a,p])=>{
+    csv(w).slice(1).forEach(r=>{if(r[1]) workers[r[1]]={name:r[2],des:r[3],rate:r[5]}})
+    csv(a).slice(1).forEach(r=>{if(r[1]) attendance.push({id:r[1],date:fDate(r[5]),att:+r[6]||0,ot:+r[7]||0})})
+    csv(p).slice(1).forEach(r=>{if(r[0]) payments.push({id:r[0],date:fDate(r[1]),amount:+r[2]||0})})
 
-    csv(w).slice(1).forEach(r=>{
-        if(r[1]) workers[r[1]]={name:r[2],des:r[3],rate:r[5]};
-    });
-
-    csv(a).slice(1).forEach(r=>{
-        if(r[1]) attendance.push({
-            id:r[1],
-            date:fDate(r[5]),
-            att:+r[6]||0,
-            ot:+r[7]||0
-        });
-    });
-
-    // 🔐 DECIDE VIEW
     let params=new URLSearchParams(location.search);
     let id=params.get("id");
 
     loader.style.display="none";
 
     if(id && workers[id]){
-        showDashboard(id);   // AUTO LOGIN
+        showDashboard(id);   // AUTO LOGIN via URL
     }else{
-        loginBox.classList.remove("hide");
+        loginBox.classList.remove("hide");   // SHOW MANUAL LOGIN
     }
 });
 
@@ -221,7 +181,7 @@ function manualLogin(){
 function showDashboard(id){
     loggedId=id;
     loginBox.classList.add("hide");
-    dashboard.classList.remove("hide");
+    dashboardPage.classList.remove("hide");
 
     dId.innerText=id;
     dName.innerText=workers[id].name;
@@ -229,37 +189,49 @@ function showDashboard(id){
     dRate.innerText=workers[id].rate;
     avatar.innerText=workers[id].name.charAt(0).toUpperCase();
 
-    filterData();
+    filterAttendance();
 }
 
-function logout(){
-    location.href="./";
+function logout(){location.href="./"}
+
+/* ================= PAGE SWITCH ================= */
+function showPage(pageId){
+    dashboardPage.classList.add("hide");
+    paymentPage.classList.add("hide");
+    document.getElementById(pageId).classList.remove("hide");
+    if(pageId==="paymentPage") filterPayment();
 }
 
-/* ================= FILTER ================= */
-function filterData(){
-    let s=startDate.value,e=endDate.value;
-    output.innerHTML="";
+/* ================= FILTER ATTENDANCE ================= */
+function filterAttendance(){
+    let s=startDateAtt.value,e=endDateAtt.value;
+    outputAtt.innerHTML="";
     let ta=0,to=0;
-
     attendance.forEach(r=>{
         if(r.id!==loggedId) return;
         if(s && r.date<s) return;
         if(e && r.date>e) return;
-
         ta+=r.att; to+=r.ot;
-        output.innerHTML+=`
-        <tr>
-            <td>${r.date}</td>
-            <td>${r.att}</td>
-            <td>${r.ot}</td>
-        </tr>`;
+        outputAtt.innerHTML+=`<tr><td>${r.date}</td><td>${r.att}</td><td>${r.ot}</td></tr>`;
     });
-
     sumAtt.innerText=ta;
     sumOT.innerText=to;
 }
-</script>
 
+/* ================= FILTER PAYMENT ================= */
+function filterPayment(){
+    let s=startDatePay.value,e=endDatePay.value;
+    outputPay.innerHTML="";
+    let total=0;
+    payments.forEach(r=>{
+        if(r.id!==loggedId) return;
+        if(s && r.date<s) return;
+        if(e && r.date>e) return;
+        total+=r.amount;
+        outputPay.innerHTML+=`<tr><td>${r.date}</td><td>${r.amount}</td></tr>`;
+    });
+    totalPayment.innerText=total;
+}
+</script>
 </body>
 </html>
